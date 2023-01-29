@@ -1,0 +1,382 @@
+binary-debuggable-source
+0000 0000 f main.asm
+0000 0000 s decompress	.EQU	0A000H		;Old Stack Location 
+0000 0000 s rows        .EQU	32
+0000 0000 s cols        .EQU	32/4
+0000 0000 s 
+0000 0000 s CR          .EQU     0DH
+0000 0000 s LF          .EQU     0AH
+0000 0000 s 
+9000 9000 s 	.ORG 9000H
+9000 9000 s printImage:
+9000 9000 d 21a490
+9000 9000 u 03 01
+9000 9000 s 	ld		HL, image           ;Load and Decompress the image
+9003 9003 d 1100a0
+9003 9003 u 03 01
+9003 9003 s     ld		DE,decompress
+9006 9006 d cd6090
+9006 9006 u 03 01
+9006 9006 s     call    dzx0_standard
+9009 9009 s 
+9009 9009 d 1620
+9009 9009 u 02 01
+9009 9009 s     LD      D, rows             ;Number of ROWS
+900b 900b d 1e08
+900b 900b u 02 01
+900b 900b s     LD      E, cols             ;Number of COLS
+900d 900d s 
+900d 900d d 2100a0
+900d 900d u 03 01
+900d 900d s     LD      HL,decompress       ;Start HL
+9010 9010 s mainLoop: 
+9010 9010 d d5
+9010 9010 u 01 01
+9010 9010 s     PUSH    DE                  ;Store awy for later
+9011 9011 d 1817
+9011 9011 u 02 01
+9011 9011 s     JR      printByte           ;Print the a byte
+9013 9013 s printReturn:
+9013 9013 d 23
+9013 9013 u 01 01
+9013 9013 s     INC     HL                  ;Get the next byte
+9014 9014 d d1
+9014 9014 u 01 01
+9014 9014 s     POP     DE                  ;GET DE Back
+9015 9015 d 43
+9015 9015 u 01 01
+9015 9015 s     LD      B,E                 ;GET Cols
+9016 9016 d 100f
+9016 9016 u 02 01
+9016 9016 s     DJNZ    saveColPos          ;Are we at the end of a row?
+9018 9018 d 1e08
+9018 9018 u 02 01
+9018 9018 s     LD      E, cols             ;Reset Col Position
+901a 901a d 3e0d
+901a 901a u 02 01
+901a 901a s     LD      A, CR               ;New Line
+901c 901c d cf
+901c 901c u 01 01
+901c 901c s     RST     08H
+901d 901d d 3e0a
+901d 901d u 02 01
+901d 901d s     LD      A, LF
+901f 901f d cf
+901f 901f u 01 01
+901f 901f s     RST     08H
+9020 9020 d 42
+9020 9020 u 01 01
+9020 9020 s     LD      B, D
+9021 9021 d 1001
+9021 9021 u 02 01
+9021 9021 s     DJNZ    saveRowPos
+9023 9023 d c9
+9023 9023 u 01 01
+9023 9023 s     RET
+9024 9024 s 
+9024 9024 s saveRowPos:
+9024 9024 d 50
+9024 9024 u 01 01
+9024 9024 s     LD      D,B
+9025 9025 d 18e9
+9025 9025 u 02 01
+9025 9025 s     JR      mainLoop
+9027 9027 s 
+9027 9027 s saveColPos:
+9027 9027 d 58
+9027 9027 u 01 01
+9027 9027 s     LD      E,B
+9028 9028 d 18e6
+9028 9028 u 02 01
+9028 9028 s     JR      mainLoop           
+902a 902a s 
+902a 902a s printByte:
+902a 902a d 4e
+902a 902a u 01 01
+902a 902a s     LD      C, (HL)             ;Load in the data
+902b 902b d 79
+902b 902b u 01 01
+902b 902b s     LD      A, C                ;Take the upper byte
+902c 902c d cd4c90
+902c 902c u 03 01
+902c 902c s     CALL    printChar           ;Print the char of the byte 1
+902f 902f d 79
+902f 902f u 01 01
+902f 902f s     LD      A,C                 
+9030 9030 d cb1f
+9030 9030 u 02 01
+9030 9030 s     RR      A                   ;Move to the next nibble
+9032 9032 d cb1f
+9032 9032 u 02 01
+9032 9032 s     RR      A
+9034 9034 d 4f
+9034 9034 u 01 01
+9034 9034 s     LD      C,A
+9035 9035 d cd4c90
+9035 9035 u 03 01
+9035 9035 s     CALL    printChar           ;Print the char of the byte 2
+9038 9038 d 79
+9038 9038 u 01 01
+9038 9038 s     LD      A,C                 
+9039 9039 d cb1f
+9039 9039 u 02 01
+9039 9039 s     RR      A                   ;Move to the next nibble
+903b 903b d cb1f
+903b 903b u 02 01
+903b 903b s     RR      A
+903d 903d d 4f
+903d 903d u 01 01
+903d 903d s     LD      C,A
+903e 903e d cd4c90
+903e 903e u 03 01
+903e 903e s     CALL    printChar           ;Print the char of the byte 3
+9041 9041 d 79
+9041 9041 u 01 01
+9041 9041 s     LD      A,C                 
+9042 9042 d cb1f
+9042 9042 u 02 01
+9042 9042 s     RR      A                   ;Move to the next nibble
+9044 9044 d cb1f
+9044 9044 u 02 01
+9044 9044 s     RR      A
+9046 9046 d 4f
+9046 9046 u 01 01
+9046 9046 s     LD      C,A
+9047 9047 d cd4c90
+9047 9047 u 03 01
+9047 9047 s     CALL    printChar           ;Print the char of the byte 4
+904a 904a d 18c7
+904a 904a u 02 01
+904a 904a s     JR      printReturn
+904c 904c s 
+904c 904c s printChar:                      ;prints the char indexed in A
+904c 904c d e603
+904c 904c u 02 01
+904c 904c s     AND		00000011b           ;Mask off the lower bits
+904e 904e d 115091
+904e 904e u 03 01
+904e 904e s     LD      DE, chars           ;Get the adress of the printout chars
+9051 9051 d fe00
+9051 9051 u 02 01
+9051 9051 s     CP      00H
+9053 9053 d 2807
+9053 9053 u 02 01
+9053 9053 s     JR      Z, endScan          ;If we have a zero, go styright to print
+9055 9055 d 47
+9055 9055 u 01 01
+9055 9055 s     LD      B,  A               ;If not setup a loop
+9056 9056 d 320050
+9056 9056 u 03 01
+9056 9056 s     LD      (05000H),A
+9059 9059 s scanChars:
+9059 9059 d 13
+9059 9059 u 01 01
+9059 9059 s     INC     DE
+905a 905a d 10fd
+905a 905a u 02 01
+905a 905a s     DJNZ    scanChars 
+905c 905c s endScan:
+905c 905c d 1a
+905c 905c u 01 01
+905c 905c s     LD      A, (DE)
+905d 905d d cf
+905d 905d u 01 01
+905d 905d s     RST     08H                 ;print out the char
+905e 905e d cf
+905e 905e u 01 01
+905e 905e s     RST     08H
+905f 905f d c9
+905f 905f u 01 01
+905f 905f s     RET
+9060 9060 s     
+9060 9060 s     include 'compress.asm'
+9060 9060 f compress.asm
+9060 9060 s ; -----------------------------------------------------------------------------
+9060 9060 s ; ZX0 decoder by Einar Saukas & Urusergi
+9060 9060 s ; "Standard" version (68 bytes only)
+9060 9060 s ; -----------------------------------------------------------------------------
+9060 9060 s ; Parameters:
+9060 9060 s ;   HL: source address (compressed data)
+9060 9060 s ;   DE: destination address (decompressing)
+9060 9060 s ; -----------------------------------------------------------------------------
+9060 9060 s 
+9060 9060 s dzx0_standard:
+9060 9060 d 01ffff
+9060 9060 u 03 01
+9060 9060 s         ld      bc, $ffff               ; preserve default offset 1
+9063 9063 d c5
+9063 9063 u 01 01
+9063 9063 s         push    bc
+9064 9064 d 03
+9064 9064 u 01 01
+9064 9064 s         inc     bc
+9065 9065 d 3e80
+9065 9065 u 02 01
+9065 9065 s         ld      a, $80
+9067 9067 s dzx0s_literals:
+9067 9067 d cd9590
+9067 9067 u 03 01
+9067 9067 s         call    dzx0s_elias             ; obtain length
+906a 906a d edb0
+906a 906a u 02 01
+906a 906a s         ldir                            ; copy literals
+906c 906c d 87
+906c 906c u 01 01
+906c 906c s         add     a, a                    ; copy from last offset or new offset?
+906d 906d d 380d
+906d 906d u 02 01
+906d 906d s         jr      c, dzx0s_new_offset
+906f 906f d cd9590
+906f 906f u 03 01
+906f 906f s         call    dzx0s_elias             ; obtain length
+9072 9072 s dzx0s_copy:
+9072 9072 d e3
+9072 9072 u 01 01
+9072 9072 s         ex      (sp), hl                ; preserve source, restore offset
+9073 9073 d e5
+9073 9073 u 01 01
+9073 9073 s         push    hl                      ; preserve offset
+9074 9074 d 19
+9074 9074 u 01 01
+9074 9074 s         add     hl, de                  ; calculate destination - offset
+9075 9075 d edb0
+9075 9075 u 02 01
+9075 9075 s         ldir                            ; copy from offset
+9077 9077 d e1
+9077 9077 u 01 01
+9077 9077 s         pop     hl                      ; restore offset
+9078 9078 d e3
+9078 9078 u 01 01
+9078 9078 s         ex      (sp), hl                ; preserve offset, restore source
+9079 9079 d 87
+9079 9079 u 01 01
+9079 9079 s         add     a, a                    ; copy from literals or new offset?
+907a 907a d 30eb
+907a 907a u 02 01
+907a 907a s         jr      nc, dzx0s_literals
+907c 907c s dzx0s_new_offset:
+907c 907c d c1
+907c 907c u 01 01
+907c 907c s         pop     bc                      ; discard last offset
+907d 907d d 0efe
+907d 907d u 02 01
+907d 907d s         ld      c, $fe                  ; prepare negative offset
+907f 907f d cd9690
+907f 907f u 03 01
+907f 907f s         call    dzx0s_elias_loop        ; obtain offset MSB
+9082 9082 d 0c
+9082 9082 u 01 01
+9082 9082 s         inc     c
+9083 9083 d c8
+9083 9083 u 01 01
+9083 9083 s         ret     z                       ; check end marker
+9084 9084 d 41
+9084 9084 u 01 01
+9084 9084 s         ld      b, c
+9085 9085 d 4e
+9085 9085 u 01 01
+9085 9085 s         ld      c, (hl)                 ; obtain offset LSB
+9086 9086 d 23
+9086 9086 u 01 01
+9086 9086 s         inc     hl
+9087 9087 d cb18
+9087 9087 u 02 01
+9087 9087 s         rr      b                       ; last offset bit becomes first length bit
+9089 9089 d cb19
+9089 9089 u 02 01
+9089 9089 s         rr      c
+908b 908b d c5
+908b 908b u 01 01
+908b 908b s         push    bc                      ; preserve new offset
+908c 908c d 010100
+908c 908c u 03 01
+908c 908c s         ld      bc, 1                   ; obtain length
+908f 908f d d49d90
+908f 908f u 03 01
+908f 908f s         call    nc, dzx0s_elias_backtrack
+9092 9092 d 03
+9092 9092 u 01 01
+9092 9092 s         inc     bc
+9093 9093 d 18dd
+9093 9093 u 02 01
+9093 9093 s         jr      dzx0s_copy
+9095 9095 s dzx0s_elias:
+9095 9095 d 0c
+9095 9095 u 01 01
+9095 9095 s         inc     c                       ; interlaced Elias gamma coding
+9096 9096 s dzx0s_elias_loop:
+9096 9096 d 87
+9096 9096 u 01 01
+9096 9096 s         add     a, a
+9097 9097 d 2003
+9097 9097 u 02 01
+9097 9097 s         jr      nz, dzx0s_elias_skip
+9099 9099 d 7e
+9099 9099 u 01 01
+9099 9099 s         ld      a, (hl)                 ; load another group of 8 bits
+909a 909a d 23
+909a 909a u 01 01
+909a 909a s         inc     hl
+909b 909b d 17
+909b 909b u 01 01
+909b 909b s         rla
+909c 909c s dzx0s_elias_skip:
+909c 909c d d8
+909c 909c u 01 01
+909c 909c s         ret     c
+909d 909d s dzx0s_elias_backtrack:
+909d 909d d 87
+909d 909d u 01 01
+909d 909d s         add     a, a
+909e 909e d cb11
+909e 909e u 02 01
+909e 909e s         rl      c
+90a0 90a0 d cb10
+90a0 90a0 u 02 01
+90a0 90a0 s         rl      b
+90a2 90a2 d 18f2
+90a2 90a2 u 02 01
+90a2 90a2 s         jr      dzx0s_elias_loop
+90a4 90a4 s ; -----------------------------------------------------------------------------
+90a4 90a4 f main.asm
+90a4 90a4 s image:
+90a4 90a4 s     incbin "imagesmaller.bin"
+90a4 90a4 d 89ff8e56fafff161bf0190826f0540fe
+90b4 90b4 d 08200b0100f982015569e562bf1489e5
+90c4 90c4 d 96862f50aaaa9b621b5498be6efea20b
+90d4 90d4 d 26fe6a980692abf99aaf0226fa9ff519
+90e4 90e4 d 98aaaee96640a99a6ee60950955a6a8a
+90f4 90f4 d 07048656194085abbed6985595ae618a
+9104 9104 d a596aafed50262fad67ab2eaeaf00182
+9114 9114 d 55aae9565a552600945188aa593ae1aa
+9124 9124 d 287f9895fa6aae3f41bbfee105a3f0ba
+9134 9134 d 4aaac106402a46e8fdf100a241281504
+9144 9144 d 88956a8de51aed51cbe45556
+90a4 90a4 u ac 02
+9150 9150 d 203a2a40
+9150 9150 u 04 02
+9150 9150 s chars:    .BYTE   " :*@"
+0020 v rows
+9150 a chars
+9067 a dzx0s_literals
+909c a dzx0s_elias_skip
+902a a printByte
+9060 a dzx0_standard
+9096 a dzx0s_elias_loop
+0008 v cols
+a000 v decompress
+000d v CR
+000a v LF
+909d a dzx0s_elias_backtrack
+904c a printChar
+9013 a printReturn
+9024 a saveRowPos
+9010 a mainLoop
+905c a endScan
+90a4 a image
+9095 a dzx0s_elias
+9059 a scanChars
+907c a dzx0s_new_offset
+9027 a saveColPos
+9072 a dzx0s_copy
+9000 a printImage

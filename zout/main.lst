@@ -1,0 +1,184 @@
+   1:     -	A000          	decompress	.EQU	0A000H		;Old Stack Location 
+   2:     -	0020          	rows        .EQU	32
+   3:     -	0008          	cols        .EQU	32/4
+   4:				
+   5:     -	000D          	CR          .EQU     0DH
+   6:     -	000A          	LF          .EQU     0AH
+   7:				
+   8:     -	9000          		.ORG 9000H
+   9:     -	9000          	printImage:
+  10:    0+10	9000  21A490  		ld		HL, image           ;Load and Decompress the image
+  11:   10+10	9003  1100A0  	    ld		DE,decompress
+  12:   20+17	9006  CD6090  	    call    dzx0_standard
+  13:				
+  14:   37+7	9009  1620    	    LD      D, rows             ;Number of ROWS
+  15:   44+7	900B  1E08    	    LD      E, cols             ;Number of COLS
+  16:				
+  17:   51+10	900D  2100A0  	    LD      HL,decompress       ;Start HL
+  18:     -	9010          	mainLoop: 
+  19:   61+11	9010  D5      	    PUSH    DE                  ;Store awy for later
+  20:   72+12	9011  1817    	    JR      printByte           ;Print the a byte
+  21:     -	9013          	printReturn:
+  22:   84+6	9013  23      	    INC     HL                  ;Get the next byte
+  23:   90+10	9014  D1      	    POP     DE                  ;GET DE Back
+  24:  100+4	9015  43      	    LD      B,E                 ;GET Cols
+  25:  104+8+5	9016  100F    	    DJNZ    saveColPos          ;Are we at the end of a row?
+  26:  112+7	9018  1E08    	    LD      E, cols             ;Reset Col Position
+  27:  119+7	901A  3E0D    	    LD      A, CR               ;New Line
+  28:  126+11	901C  CF      	    RST     08H
+  29:  137+7	901D  3E0A    	    LD      A, LF
+  30:  144+11	901F  CF      	    RST     08H
+  31:  155+4	9020  42      	    LD      B, D
+  32:  159+8+5	9021  1001    	    DJNZ    saveRowPos
+  33:  167+10	9023  C9      	    RET
+  34:				
+  35:     -	9024          	saveRowPos:
+  36:  177+4	9024  50      	    LD      D,B
+  37:  181+12	9025  18E9    	    JR      mainLoop
+  38:				
+  39:     -	9027          	saveColPos:
+  40:  193+4	9027  58      	    LD      E,B
+  41:  197+12	9028  18E6    	    JR      mainLoop           
+  42:				
+  43:     -	902A          	printByte:
+  44:  209+7	902A  4E      	    LD      C, (HL)             ;Load in the data
+  45:  216+4	902B  79      	    LD      A, C                ;Take the upper byte
+  46:  220+17	902C  CD4C90  	    CALL    printChar           ;Print the char of the byte 1
+  47:  237+4	902F  79      	    LD      A,C                 
+  48:  241+8	9030  CB1F    	    RR      A                   ;Move to the next nibble
+  49:  249+8	9032  CB1F    	    RR      A
+  50:  257+4	9034  4F      	    LD      C,A
+  51:  261+17	9035  CD4C90  	    CALL    printChar           ;Print the char of the byte 2
+  52:  278+4	9038  79      	    LD      A,C                 
+  53:  282+8	9039  CB1F    	    RR      A                   ;Move to the next nibble
+  54:  290+8	903B  CB1F    	    RR      A
+  55:  298+4	903D  4F      	    LD      C,A
+  56:  302+17	903E  CD4C90  	    CALL    printChar           ;Print the char of the byte 3
+  57:  319+4	9041  79      	    LD      A,C                 
+  58:  323+8	9042  CB1F    	    RR      A                   ;Move to the next nibble
+  59:  331+8	9044  CB1F    	    RR      A
+  60:  339+4	9046  4F      	    LD      C,A
+  61:  343+17	9047  CD4C90  	    CALL    printChar           ;Print the char of the byte 4
+  62:  360+12	904A  18C7    	    JR      printReturn
+  63:				
+  64:     -	904C          	printChar:                      ;prints the char indexed in A
+  65:  372+7	904C  E603    	    AND		00000011b           ;Mask off the lower bits
+  66:  379+10	904E  115091  	    LD      DE, chars           ;Get the adress of the printout chars
+  67:  389+7	9051  FE00    	    CP      00H
+  68:  396+7+5	9053  2807    	    JR      Z, endScan          ;If we have a zero, go styright to print
+  69:  403+4	9055  47      	    LD      B,  A               ;If not setup a loop
+  70:  407+13	9056  320050  	    LD      (05000H),A
+  71:     -	9059          	scanChars:
+  72:  420+6	9059  13      	    INC     DE
+  73:  426+8+5	905A  10FD    	    DJNZ    scanChars 
+  74:     -	905C          	endScan:
+  75:  434+7	905C  1A      	    LD      A, (DE)
+  76:  441+11	905D  CF      	    RST     08H                 ;print out the char
+  77:  452+11	905E  CF      	    RST     08H
+  78:  463+10	905F  C9      	    RET
+  79:				    
+  80:				    include 'compress.asm'
+**** compress.asm ****
+   1:				; -----------------------------------------------------------------------------
+   2:				; ZX0 decoder by Einar Saukas & Urusergi
+   3:				; "Standard" version (68 bytes only)
+   4:				; -----------------------------------------------------------------------------
+   5:				; Parameters:
+   6:				;   HL: source address (compressed data)
+   7:				;   DE: destination address (decompressing)
+   8:				; -----------------------------------------------------------------------------
+   9:				
+  10:     -	9060          	dzx0_standard:
+  11:  473+10	9060  01FFFF  	        ld      bc, $ffff               ; preserve default offset 1
+  12:  483+11	9063  C5      	        push    bc
+  13:  494+6	9064  03      	        inc     bc
+  14:  500+7	9065  3E80    	        ld      a, $80
+  15:     -	9067          	dzx0s_literals:
+  16:  507+17	9067  CD9590  	        call    dzx0s_elias             ; obtain length
+  17:  524+16+5	906A  EDB0    	        ldir                            ; copy literals
+  18:  540+4	906C  87      	        add     a, a                    ; copy from last offset or new offset?
+  19:  544+7+5	906D  380D    	        jr      c, dzx0s_new_offset
+  20:  551+17	906F  CD9590  	        call    dzx0s_elias             ; obtain length
+  21:     -	9072          	dzx0s_copy:
+  22:  568+19	9072  E3      	        ex      (sp), hl                ; preserve source, restore offset
+  23:  587+11	9073  E5      	        push    hl                      ; preserve offset
+  24:  598+11	9074  19      	        add     hl, de                  ; calculate destination - offset
+  25:  609+16+5	9075  EDB0    	        ldir                            ; copy from offset
+  26:  625+10	9077  E1      	        pop     hl                      ; restore offset
+  27:  635+19	9078  E3      	        ex      (sp), hl                ; preserve offset, restore source
+  28:  654+4	9079  87      	        add     a, a                    ; copy from literals or new offset?
+  29:  658+7+5	907A  30EB    	        jr      nc, dzx0s_literals
+  30:     -	907C          	dzx0s_new_offset:
+  31:  665+10	907C  C1      	        pop     bc                      ; discard last offset
+  32:  675+7	907D  0EFE    	        ld      c, $fe                  ; prepare negative offset
+  33:  682+17	907F  CD9690  	        call    dzx0s_elias_loop        ; obtain offset MSB
+  34:  699+4	9082  0C      	        inc     c
+  35:  703+5+6	9083  C8      	        ret     z                       ; check end marker
+  36:  708+4	9084  41      	        ld      b, c
+  37:  712+7	9085  4E      	        ld      c, (hl)                 ; obtain offset LSB
+  38:  719+6	9086  23      	        inc     hl
+  39:  725+8	9087  CB18    	        rr      b                       ; last offset bit becomes first length bit
+  40:  733+8	9089  CB19    	        rr      c
+  41:  741+11	908B  C5      	        push    bc                      ; preserve new offset
+  42:  752+10	908C  010100  	        ld      bc, 1                   ; obtain length
+  43:  762+10+7	908F  D49D90  	        call    nc, dzx0s_elias_backtrack
+  44:  772+6	9092  03      	        inc     bc
+  45:  778+12	9093  18DD    	        jr      dzx0s_copy
+  46:     -	9095          	dzx0s_elias:
+  47:  790+4	9095  0C      	        inc     c                       ; interlaced Elias gamma coding
+  48:     -	9096          	dzx0s_elias_loop:
+  49:  794+4	9096  87      	        add     a, a
+  50:  798+7+5	9097  2003    	        jr      nz, dzx0s_elias_skip
+  51:  805+7	9099  7E      	        ld      a, (hl)                 ; load another group of 8 bits
+  52:  812+6	909A  23      	        inc     hl
+  53:  818+4	909B  17      	        rla
+  54:     -	909C          	dzx0s_elias_skip:
+  55:  822+5+6	909C  D8      	        ret     c
+  56:     -	909D          	dzx0s_elias_backtrack:
+  57:  827+4	909D  87      	        add     a, a
+  58:  831+8	909E  CB11    	        rl      c
+  59:  839+8	90A0  CB10    	        rl      b
+  60:  847+12	90A2  18F2    	        jr      dzx0s_elias_loop
+  61:				; -----------------------------------------------------------------------------
+**** main.asm ****
+  81:     -	90A4          	image:
+  82:     -	90A4 ..914F 	    incbin "imagesmaller.bin"
+  83:     -	9150  203A2A40	chars:    .BYTE   " :*@"
+
+
+
+Statistics:
+
+     4	passes
+     0	jr promotions
+    24	symbols
+   340	bytes
+
+
+
+Symbol Table:
+
+CR             =0D        13
+LF             =0A        10
+chars           9150      37200
+cols           =08        8
+decompress     =A000      40960
+dzx0_standard   9060      36960
+dzx0s_copy      9072      36978
+dzx0s_elias     9095      37013
+dzx0s_elias_backtrack 909D      37021
+dzx0s_elias_loop 9096      37014
+dzx0s_elias_skip 909C      37020
+dzx0s_literals  9067      36967
+dzx0s_new_offset 907C      36988
+endScan         905C      36956
+image           90A4      37028
+mainLoop        9010      36880
+printByte       902A      36906
+printChar       904C      36940
+printImage      9000      36864
+printReturn     9013      36883
+rows           =20        32
+saveColPos      9027      36903
+saveRowPos      9024      36900
+scanChars       9059      36953
