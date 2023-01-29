@@ -79,5 +79,5 @@ endScan:
     
     include 'compress.asm'
 image:
-    incbin "imagesmaller.bin"
+    incbin "image.bin"
 chars:    .BYTE   " :*@"
