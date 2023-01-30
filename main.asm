@@ -28,56 +28,45 @@ printReturn:
     RST     08H
     LD      A, LF
     RST     08H
-    LD      B, D
-    DJNZ    saveRowPos
-    RET
+    LD      B, D                ;Are we at the end of the file
+    DJNZ    saveRowPos          ;if not, pesist D
+    RET                         ;EXIT 
 
 saveRowPos:
-    LD      D,B
+    LD      D,B                 ;Persist the new D
     JR      mainLoop
 
 saveColPos:
-    LD      E,B
+    LD      E,B                 ;Persist the new E
     JR      mainLoop           
 
 printByte:
-    LD      C, (HL)             ;Load in the data
-    LD      A, C                ;Take the upper byte
-    CALL    printChar           ;Print the char of the byte 1
-    LD      A,C                 
-    RR      A                   ;Move to the next nibble
-    RR      A
-    LD      C,A
-    CALL    printChar           ;Print the char of the byte 2
-    LD      A,C                 
-    RR      A                   ;Move to the next nibble
-    RR      A
-    LD      C,A
-    CALL    printChar           ;Print the char of the byte 3
-    LD      A,C                 
-    RR      A                   ;Move to the next nibble
-    RR      A
-    LD      C,A
-    CALL    printChar           ;Print the char of the byte 4
-    JR      printReturn
-
+    LD      C, (HL)             ;Load in the data into C for safe keeping
+    LD      A, C                ;Move it into A so we can work on it
+    LD      B, 3                ;Setup the loop to pogress through the byte
+bytePrintLoop:
+    PUSH    BC                  ;Save the position of the byte progress loop to the stack
 printChar:                      ;prints the char indexed in A
     AND		00000011b           ;Mask off the lower bits
     LD      DE, chars           ;Get the adress of the printout chars
-    CP      00H
-    JR      Z, endScan          ;If we have a zero, go styright to print
+    JR      Z, endScan          ;If we have a zero, go straight to print
     LD      B,  A               ;If not setup a loop
-    LD      (05000H),A
 scanChars:
-    INC     DE
+    INC     DE                  ;For the size of A, increment through the char array (moving into lighter chars)
     DJNZ    scanChars 
 endScan:
     LD      A, (DE)
     RST     08H                 ;print out the char
     RST     08H
-    RET
+    POP     BC                  ;Retrive the position of the byte progress loop to the stack
+    LD      A,C                 ;Get back a clean copy of the data
+    RR      A                   ;Move to the next nibble
+    RR      A
+    LD      C,A                 ;Persist the shifted byte into C
+    DJNZ    bytePrintLoop       ;Are we at the end of the byte
+    JR      printReturn
     
     include 'compress.asm'
 image:
-    incbin "image.bin"
+    incbin "examples/image.bin"
 chars:    .BYTE   " :*@"
