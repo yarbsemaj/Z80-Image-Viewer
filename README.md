@@ -2,6 +2,8 @@
 
 A simple program to view compressed 2bpp 32x32 compressed images on a RC2014 compatible SBC.
 
+![image-e g](https://user-images.githubusercontent.com/17494632/216797402-782b71db-b258-4799-9a3a-7b29be04db89.jpg)
+
 
 ## How to create an image
 1. Create a 32x32, index colour, image using the pallet provided, this can be done in an image editor like GIMP
