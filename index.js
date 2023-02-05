@@ -1,7 +1,7 @@
 const { buffer } = require('stream/consumers');
 
 var fs = require('fs'),
-    binary = fs.readFileSync('./image.raw');
+    binary = fs.readFileSync('./examples/image.raw');
 
 function* hexFormatValues(buffer) {
     for (let x of buffer) {
@@ -10,8 +10,6 @@ function* hexFormatValues(buffer) {
     }
 }
 
-let bytePosition = 0;
-let currentValue = 0;
 let values = []
 for (let hex of hexFormatValues(binary)) {
     values.push(hex)
@@ -37,9 +35,5 @@ let mergedChunks = chunk.map((byte) => {
         (parseInt(byte[3]) << 6))
 })
 
-console.log(mergedChunks)
-
-console.log(Buffer.from(mergedChunks))
-
-binary = fs.writeFileSync('./image.out', Buffer.from(mergedChunks));
+binary = fs.writeFileSync('./examples/image.out', Buffer.from(mergedChunks));
 

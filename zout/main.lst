@@ -1,4 +1,4 @@
-   1:     -	A000          	decompress	.EQU	0A000H		;Old Stack Location 
+   1:     -	A000          	decompress	.EQU	0A000H
    2:     -	0020          	rows        .EQU	32
    3:     -	0008          	cols        .EQU	32/4
    4:				
@@ -43,12 +43,12 @@
   43:     -	902A          	printByte:
   44:  209+7	902A  4E      	    LD      C, (HL)             ;Load in the data into C for safe keeping
   45:  216+4	902B  79      	    LD      A, C                ;Move it into A so we can work on it
-  46:  220+7	902C  0603    	    LD      B, 3                ;Setup the loop to pogress through the byte
+  46:  220+7	902C  0604    	    LD      B, 4                ;Setup the loop to pogress through the byte
   47:     -	902E          	bytePrintLoop:
   48:  227+11	902E  C5      	    PUSH    BC                  ;Save the position of the byte progress loop to the stack
   49:     -	902F          	printChar:                      ;prints the char indexed in A
   50:  238+7	902F  E603    	    AND		00000011b           ;Mask off the lower bits
-  51:  245+10	9031  113891  	    LD      DE, chars           ;Get the adress of the printout chars
+  51:  245+10	9031  114E91  	    LD      DE, chars           ;Get the adress of the printout chars
   52:  255+7+5	9034  2804    	    JR      Z, endScan          ;If we have a zero, go straight to print
   53:  262+4	9036  47      	    LD      B,  A               ;If not setup a loop
   54:     -	9037          	scanChars:
@@ -131,8 +131,8 @@
   61:				; -----------------------------------------------------------------------------
 **** main.asm ****
   70:     -	908C          	image:
-  71:     -	908C ..9137 	    incbin "examples/image.bin"
-  72:     -	9138  203A2A40	chars:    .BYTE   " :*@"
+  71:     -	908C ..914D 	    incbin "examples/image.bin"
+  72:     -	914E  203A2A40	chars:    .BYTE   " :*@"
 
 
 
@@ -141,7 +141,7 @@ Statistics:
      4	passes
      0	jr promotions
     25	symbols
-   316	bytes
+   338	bytes
 
 
 
@@ -150,7 +150,7 @@ Symbol Table:
 CR             =0D        13
 LF             =0A        10
 bytePrintLoop   902E      36910
-chars           9138      37176
+chars           914E      37198
 cols           =08        8
 decompress     =A000      40960
 dzx0_standard   9048      36936

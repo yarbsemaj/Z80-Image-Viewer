@@ -1,6 +1,6 @@
 binary-debuggable-source
 0000 0000 f main.asm
-0000 0000 s decompress	.EQU	0A000H		;Old Stack Location 
+0000 0000 s decompress	.EQU	0A000H
 0000 0000 s rows        .EQU	32
 0000 0000 s cols        .EQU	32/4
 0000 0000 s 
@@ -97,9 +97,9 @@ binary-debuggable-source
 902b 902b d 79
 902b 902b u 01 01
 902b 902b s     LD      A, C                ;Move it into A so we can work on it
-902c 902c d 0603
+902c 902c d 0604
 902c 902c u 02 01
-902c 902c s     LD      B, 3                ;Setup the loop to pogress through the byte
+902c 902c s     LD      B, 4                ;Setup the loop to pogress through the byte
 902e 902e s bytePrintLoop:
 902e 902e d c5
 902e 902e u 01 01
@@ -108,7 +108,7 @@ binary-debuggable-source
 902f 902f d e603
 902f 902f u 02 01
 902f 902f s     AND		00000011b           ;Mask off the lower bits
-9031 9031 d 113891
+9031 9031 d 114e91
 9031 9031 u 03 01
 9031 9031 s     LD      DE, chars           ;Get the adress of the printout chars
 9034 9034 d 2804
@@ -308,23 +308,25 @@ binary-debuggable-source
 908c 908c f main.asm
 908c 908c s image:
 908c 908c s     incbin "examples/image.bin"
-908c 908c d 89ff8e56fafff161bf0190826f0540fe
-909c 909c d 08200b0100f982015569e562bf1489e5
-90ac 90ac d 96862f50aaaa9b621b5498be6efea20b
-90bc 90bc d 26fe6a980692abf99aaf0226fa9ff519
-90cc 90cc d 98aaaee96640a99a6ee60950955a6a8a
-90dc 90dc d 07048656194085abbed6985595ae618a
-90ec 90ec d a596aafed50262fad67ab2eaeaf00182
-90fc 90fc d 55aae9565a552600945188aa593ae1aa
-910c 910c d 287f9895fa6aae3f41bbfee105a3f0ba
-911c 911c d 4aaac106402a46e8fdf100a241281504
-912c 912c d 88956a8de51aed51cbe45556
-908c 908c u ac 02
-9138 9138 d 203a2a40
-9138 9138 u 04 02
-9138 9138 s chars:    .BYTE   " :*@"
+908c 908c d 86003a5440f1048a1010a550a190feaa
+909c 909c d aa0a154022a9ffffffaf010040aaea22
+90ac 90ac d ff024ea9aafaeffe0baf1695bebaabfa
+90bc 90bc d 6fa580d7faab25ee7e94c09befabeaed
+90cc 90cc d 41f1fbfff5bb5aa9f0eb9aab80969aab
+90dc 90dc d ea9956feaa8aaa0489a527a5eaab905a
+90ec 90ec d 80abfbe095baf7a9eba8825659656963
+90fc 90fc d 5a55a7feaa6aaaeef295f1faa6e0a969
+910c 910c d 96a8a58b565a54e7d0565615e6b06966
+911c 911c d 56f8f09ba99a59e0cfad985a50556adf
+912c 912c d 9a5abdf1afac59f1897ae9655065f086
+913c 913c d 45aaa58b5151b8d479fa5aa9f5fd05d5
+914c 914c d 5560
+908c 908c u c2 02
+914e 914e d 203a2a40
+914e 914e u 04 02
+914e 914e s chars:    .BYTE   " :*@"
 0020 v rows
-9138 a chars
+914e a chars
 904f a dzx0s_literals
 9084 a dzx0s_elias_skip
 902a a printByte
